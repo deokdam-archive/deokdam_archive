@@ -93,17 +93,17 @@
       font-weight: 700;
       margin: 0 0 10px;
     }
-    .text {
-      white-space: pre-line;
-      line-height: 1.65;
-      margin: 0 0 12px;
-      font-size: 15px;
-    }
     .card img {
       width: 100%;
       border-radius: 8px;
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+    }
+    .text {
+      white-space: pre-line;
+      line-height: 1.65;
+      margin: 12px 0 0;
+      font-size: 15px;
     }
     .card img:last-child {
       margin-bottom: 0;
@@ -162,11 +162,11 @@
       list.innerHTML = filtered
         .map((item) => {
           const titleHtml = item.title ? `<h2 class="title">${item.title}</h2>` : "";
-          const textHtml = item.text ? `<p class="text">${item.text}</p>` : "";
           const imgsHtml = (item.images || [])
             .map((src) => `<img src="${src}" alt="${item.title || ""}" />`)
             .join("");
-          return `<div class="card">${titleHtml}${textHtml}${imgsHtml}</div>`;
+          const textHtml = item.text ? `<p class="text">${item.text}</p>` : "";
+          return `<div class="card">${titleHtml}${imgsHtml}${textHtml}</div>`;
         })
         .join("");
     }
