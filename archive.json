@@ -5,6 +5,12 @@
     "text": "",
     "images": ["discord1.jpg"]
   },
+ {
+    "category": "discord",
+    "title": "",
+    "text": "",
+    "images": ["discord2.jpg", "discord3.jpg"]
+  },
   {
     "category": "letter",
     "title": "",
