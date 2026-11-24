@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -121,7 +122,7 @@
     let allItems = [];
     let selectedTag = "전체";
 
-    fetch("./archive.json")
+    fetch("archive.json")
       .then((res) => res.json())
       .then((data) => {
         allItems = data.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
