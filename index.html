@@ -17,6 +17,39 @@
     header { margin-bottom: 20px; }
     h1 { margin: 0; font-size: 26px; }
 
+    .lock-box {
+      background: #fff;
+      border: 1px solid #d8dee4;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 400px;
+      margin: 40px auto;
+    }
+    .lock-box p { margin: 0 0 12px; font-size: 15px; }
+    .lock-row { display: flex; gap: 8px; }
+    .lock-input {
+      flex: 1;
+      padding: 10px 12px;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    .lock-btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: #1f2328;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .error-msg {
+      color: #cf222e;
+      font-size: 13px;
+      margin-top: 8px;
+      min-height: 18px;
+    }
+
     .card {
       background: #fff;
       border: 1px solid #d8dee4;
@@ -49,7 +82,16 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div id="lockScreen" class="lock-box">
+    <p><strong>deokdam archive</strong> 비밀번호를 입력하세요.</p>
+    <div class="lock-row">
+      <input id="pwInput" class="lock-input" type="password" placeholder="비밀번호" />
+      <button id="pwBtn" class="lock-btn" type="button">확인</button>
+    </div>
+    <div id="errMsg" class="error-msg"></div>
+  </div>
+
+  <div id="archiveView" class="container" style="display: none;">
     <header>
       <h1>deokdam archive</h1>
     </header>
@@ -57,37 +99,17 @@
   </div>
 
   <script>
-    fetch("archive.json")
-      .then((res) => res.json())
-      .then((data) => {
-        const list = document.getElementById("list");
-        if (!data.length) {
-          list.innerHTML = "<p>등록된 항목이 없습니다.</p>";
-          return;
-        }
+    const PASSWORD = "0225";
 
-        list.innerHTML = data
-          .map(
-            (item) => `
-            <article class="card">
-              ${item.title ? `<h2 class="title">${item.title}</h2>` : ""}
-              ${item.text ? `<p class="text">${item.text}</p>` : ""}
-              ${
-                item.images && item.images.length
-                  ? `<div class="gallery">${item.images
-                      .map((src) => `<img src="${src}" loading="lazy" alt="${item.title || "백업 이미지"}" />`)
-                      .join("")}</div>`
-                  : ""
-              }
-            </article>
-          `
-          )
-          .join("");
-      })
-      .catch(() => {
-        document.getElementById("list").innerHTML =
-          "<p>archive.json 파일을 확인해 주세요.</p>";
-      });
-  </script>
-</body>
-</html>
+    function unlock() {
+      const val = document.getElementById("pwInput").value;
+      if (val === PASSWORD) {
+        document.getElementById("lockScreen").style.display = "none";
+        document.getElementById("archiveView").style.display = "block";
+        loadArchive();
+      } else {
+        document.getElementById("errMsg").textContent = "비밀번호가 일치하지 않습니다.";
+      }
+    }
+
+    document.getElementById("pwBtn
