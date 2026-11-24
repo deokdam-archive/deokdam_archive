@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>deokdam archive</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
       background: #f4f5f7;
@@ -12,13 +13,13 @@
       margin: 0;
       padding: 32px 16px;
     }
-    .box, .wrap {
+    .wrap {
       max-width: 820px;
       margin: 0 auto;
     }
     .box {
       max-width: 380px;
-      margin-top: 50px;
+      margin: 50px auto 0;
       background: #fff;
       border: 1px solid #d8dee4;
       border-radius: 12px;
@@ -27,17 +28,20 @@
     .row {
       display: flex;
       gap: 8px;
-      margin-top: 10px;
+      margin-top: 12px;
     }
     input {
       flex: 1;
-      padding: 10px;
+      min-width: 0;
+      padding: 10px 12px;
       border: 1px solid #d0d7de;
       border-radius: 8px;
       font-size: 15px;
     }
     button {
-      padding: 10px 14px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding: 10px 16px;
       border: none;
       border-radius: 8px;
       background: #1f2328;
@@ -49,6 +53,7 @@
       color: #cf222e;
       font-size: 13px;
       margin-top: 8px;
+      min-height: 18px;
     }
     h1 {
       margin: 0 0 20px;
@@ -70,40 +75,54 @@
 </head>
 <body>
   <div id="lock" class="box">
-    <div><strong>deokdam archive</strong> 비밀번호</div>
+    <div><strong>deokdam archive</strong> 비밀번호를 입력하세요.</div>
     <div class="row">
-      <input id="pw" type="password" placeholder="비밀번호 입력" />
+      <input id="pw" type="password" placeholder="비밀번호" />
       <button id="btn" type="button">확인</button>
     </div>
     <div id="err"></div>
   </div>
 
-  <div id="view" class="wrap" style="display:none;">
+  <div id="view" class="wrap" style="display: none;">
     <h1>deokdam archive</h1>
     <div id="list"></div>
   </div>
 
   <script>
-    const PW = "0225";
-    document.getElementById("btn").onclick = function () {
-      const val = document.getElementById("pw").value.trim();
-      if (val === PW) {
+    const btn = document.getElementById("btn");
+    const pw = document.getElementById("pw");
+    const err = document.getElementById("err");
+
+    function checkPw() {
+      if (pw.value.trim() === "0225") {
+        err.textContent = "";
         document.getElementById("lock").style.display = "none";
         document.getElementById("view").style.display = "block";
         fetch("archive.json")
-          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            return res.json();
+          })
           .then(function (items) {
-            document.getElementById("list").innerHTML = items.map(function (item) {
-              const imgs = (item.images || []).map(function (src) {
-                return '<img src="' + src + '" alt="" />';
-              }).join("");
-              return '<div class="card">' + imgs + '</div>';
-            }).join("");
+            document.getElementById("list").innerHTML = items
+              .map(function (item) {
+                const imgs = (item.images || [])
+                  .map(function (src) {
+                    return '<img src="' + src + '" alt="" />';
+                  })
+                  .join("");
+                return '<div class="card">' + imgs + "</div>";
+              })
+              .join("");
           });
       } else {
-        document.getElementById("err").textContent = "비밀번호가 일치하지 않습니다.";
+        err.textContent = "비밀번호가 일치하지 않습니다.";
       }
-    };
+    }
+
+    btn.addEventListener("click", checkPw);
+    pw.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") checkPw();
+    });
   </script>
 </body>
 </html>
