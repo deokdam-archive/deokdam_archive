@@ -56,9 +56,31 @@
       min-height: 18px;
     }
     h1 {
-      margin: 0 0 20px;
+      margin: 0 0 16px;
       font-size: 26px;
     }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .tab-btn {
+      background: #fff;
+      color: #1f2328;
+      border: 1px solid #d0d7de;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      background: #1f2328;
+      color: #fff;
+      border-color: #1f2328;
+    }
+
     .card {
       background: #fff;
       border: 1px solid #d8dee4;
@@ -66,10 +88,25 @@
       padding: 18px;
       margin-bottom: 16px;
     }
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 10px;
+    }
+    .text {
+      white-space: pre-line;
+      line-height: 1.65;
+      margin: 0 0 12px;
+      font-size: 15px;
+    }
     .card img {
       width: 100%;
       border-radius: 8px;
       display: block;
+      margin-bottom: 10px;
+    }
+    .card img:last-child {
+      margin-bottom: 0;
     }
   </style>
 </head>
@@ -85,6 +122,11 @@
 
   <div id="view" class="wrap" style="display: none;">
     <h1>deokdam archive</h1>
+    <div class="tabs">
+      <button id="tabMembership" class="tab-btn active" type="button">멤버십</button>
+      <button id="tabLetter" class="tab-btn" type="button">편지</button>
+      <button id="tabDiscord" class="tab-btn" type="button">디스코드</button>
+    </div>
     <div id="list"></div>
   </div>
 
@@ -92,6 +134,54 @@
     const btn = document.getElementById("btn");
     const pw = document.getElementById("pw");
     const err = document.getElementById("err");
+    const tabMembership = document.getElementById("tabMembership");
+    const tabLetter = document.getElementById("tabLetter");
+    const tabDiscord = document.getElementById("tabDiscord");
+
+    const tabNames = {
+      membership: "멤버십",
+      letter: "편지",
+      discord: "디스코드"
+    };
+
+    let allItems = [];
+    let currentTab = "membership";
+
+    function renderTab() {
+      const list = document.getElementById("list");
+      const filtered = allItems.filter((item) => {
+        const cat = item.category || "membership";
+        return cat === currentTab;
+      });
+
+      if (!filtered.length) {
+        list.innerHTML = `<p>${tabNames[currentTab]} 항목이 없습니다.</p>`;
+        return;
+      }
+
+      list.innerHTML = filtered
+        .map((item) => {
+          const titleHtml = item.title ? `<h2 class="title">${item.title}</h2>` : "";
+          const textHtml = item.text ? `<p class="text">${item.text}</p>` : "";
+          const imgsHtml = (item.images || [])
+            .map((src) => `<img src="${src}" alt="${item.title || ""}" />`)
+            .join("");
+          return `<div class="card">${titleHtml}${textHtml}${imgsHtml}</div>`;
+        })
+        .join("");
+    }
+
+    function setTab(tabName) {
+      currentTab = tabName;
+      tabMembership.classList.toggle("active", tabName === "membership");
+      tabLetter.classList.toggle("active", tabName === "letter");
+      tabDiscord.classList.toggle("active", tabName === "discord");
+      renderTab();
+    }
+
+    tabMembership.addEventListener("click", () => setTab("membership"));
+    tabLetter.addEventListener("click", () => setTab("letter"));
+    tabDiscord.addEventListener("click", () => setTab("discord"));
 
     function checkPw() {
       if (pw.value.trim() === "0225") {
@@ -99,20 +189,14 @@
         document.getElementById("lock").style.display = "none";
         document.getElementById("view").style.display = "block";
         fetch("archive.json")
-          .then(function (res) {
-            return res.json();
+          .then((res) => res.json())
+          .then((items) => {
+            allItems = items;
+            renderTab();
           })
-          .then(function (items) {
-            document.getElementById("list").innerHTML = items
-              .map(function (item) {
-                const imgs = (item.images || [])
-                  .map(function (src) {
-                    return '<img src="' + src + '" alt="" />';
-                  })
-                  .join("");
-                return '<div class="card">' + imgs + "</div>";
-              })
-              .join("");
+          .catch(() => {
+            document.getElementById("list").innerHTML =
+              "<p>archive.json 파일을 확인해 주세요.</p>";
           });
       } else {
         err.textContent = "비밀번호가 일치하지 않습니다.";
@@ -120,7 +204,7 @@
     }
 
     btn.addEventListener("click", checkPw);
-    pw.addEventListener("keydown", function (e) {
+    pw.addEventListener("keydown", (e) => {
       if (e.key === "Enter") checkPw();
     });
   </script>
