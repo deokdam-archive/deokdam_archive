@@ -17,18 +17,6 @@
     header { margin-bottom: 20px; }
     h1 { margin: 0; font-size: 26px; }
 
-    .controls {
-      margin-bottom: 20px;
-    }
-    .search-box {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid #d0d7de;
-      border-radius: 8px;
-      font-size: 14px;
-      background: #fff;
-    }
-
     .card {
       background: #fff;
       border: 1px solid #d8dee4;
@@ -65,60 +53,41 @@
     <header>
       <h1>deokdam archive</h1>
     </header>
-
-    <div class="controls">
-      <input id="search" class="search-box" type="text" placeholder="제목 또는 내용으로 검색..." />
-    </div>
     <div id="list">불러오는 중...</div>
   </div>
 
   <script>
-    let allItems = [];
-
     fetch("archive.json")
       .then((res) => res.json())
       .then((data) => {
-        allItems = data;
-        renderList();
+        const list = document.getElementById("list");
+        if (!data.length) {
+          list.innerHTML = "<p>등록된 항목이 없습니다.</p>";
+          return;
+        }
+
+        list.innerHTML = data
+          .map(
+            (item) => `
+            <article class="card">
+              ${item.title ? `<h2 class="title">${item.title}</h2>` : ""}
+              ${item.text ? `<p class="text">${item.text}</p>` : ""}
+              ${
+                item.images && item.images.length
+                  ? `<div class="gallery">${item.images
+                      .map((src) => `<img src="${src}" loading="lazy" alt="${item.title || "백업 이미지"}" />`)
+                      .join("")}</div>`
+                  : ""
+              }
+            </article>
+          `
+          )
+          .join("");
       })
       .catch(() => {
         document.getElementById("list").innerHTML =
           "<p>archive.json 파일을 확인해 주세요.</p>";
       });
-
-    document.getElementById("search").addEventListener("input", renderList);
-
-    function renderList() {
-      const q = document.getElementById("search").value.trim().toLowerCase();
-      const filtered = allItems.filter((item) => {
-        const hay = `${item.title || ""} ${item.text || ""}`.toLowerCase();
-        return hay.includes(q);
-      });
-
-      const list = document.getElementById("list");
-      if (!filtered.length) {
-        list.innerHTML = "<p>검색 결과가 없습니다.</p>";
-        return;
-      }
-
-      list.innerHTML = filtered
-        .map(
-          (item) => `
-          <article class="card">
-            ${item.title ? `<h2 class="title">${item.title}</h2>` : ""}
-            ${item.text ? `<p class="text">${item.text}</p>` : ""}
-            ${
-              item.images && item.images.length
-                ? `<div class="gallery">${item.images
-                    .map((src) => `<img src="${src}" loading="lazy" alt="${item.title || "백업 이미지"}" />`)
-                    .join("")}</div>`
-                : ""
-            }
-          </article>
-        `
-        )
-        .join("");
-    }
   </script>
 </body>
 </html>
