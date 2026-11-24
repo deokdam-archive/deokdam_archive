@@ -1,11 +1,11 @@
 [
-  {
+"sample1.jpg"  {
     "date": "2026-11-24",
     "tags": ["사진"],
     "title": "첫 번째 백업 사진",
     "text": "",
     "images": [
-      "photos/sample1.jpg"
+      "sample1.jpg"
     ]
   }
 ]
