@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -18,38 +17,6 @@
     header { margin-bottom: 24px; }
     h1 { margin: 0 0 6px; font-size: 26px; }
     .subtitle { color: #59636e; margin: 0; font-size: 14px; }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .search-box {
-      flex: 1;
-      min-width: 220px;
-      padding: 10px 14px;
-      border: 1px solid #d0d7de;
-      border-radius: 8px;
-      font-size: 14px;
-      background: #fff;
-    }
-    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
-    .tag-btn {
-      border: 1px solid #d0d7de;
-      background: #fff;
-      color: #24292f;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-    .tag-btn.active {
-      background: #1f2328;
-      color: #fff;
-      border-color: #1f2328;
-    }
-
     .card {
       background: #fff;
       border: 1px solid #d8dee4;
@@ -57,49 +24,11 @@
       padding: 20px;
       margin-bottom: 16px;
     }
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 13px;
-      color: #59636e;
-      margin-bottom: 10px;
-      gap: 8px;
-    }
-    .badge {
-      background: #eef2f6;
-      color: #24292f;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-weight: 600;
-      margin-right: 6px;
-    }
-    .orig-link {
-      color: #0969da;
-      text-decoration: none;
-      font-size: 13px;
-    }
-    .orig-link:hover { text-decoration: underline; }
-    .title {
-      font-size: 18px;
-      font-weight: 700;
-      margin: 0 0 10px;
-    }
-    .text {
-      white-space: pre-line;
-      line-height: 1.65;
-      margin: 0 0 14px;
-      font-size: 15px;
-    }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-    }
-    .gallery img {
+    .meta { font-size: 13px; color: #59636e; margin-bottom: 8px; }
+    .title { font-size: 18px; font-weight: 700; margin: 0 0 12px; }
+    .card img {
       width: 100%;
       border-radius: 8px;
-      border: 1px solid #eaeef2;
       display: block;
     }
   </style>
@@ -108,93 +37,31 @@
   <div class="container">
     <header>
       <h1>Archive Backup</h1>
-      <p class="subtitle">사진 및 게시물 백업 아카이브</p>
+      <p class="subtitle">사진 백업 아카이브</p>
     </header>
-
-    <div class="controls">
-      <input id="search" class="search-box" type="text" placeholder="내용, 제목, 날짜로 검색..." />
-    </div>
-    <div id="tagBar" class="tags"></div>
-    <div id="list">불러오는 중...</div>
+    <div id="list"></div>
   </div>
 
   <script>
-    let allItems = [];
-    let selectedTag = "전체";
-
-    fetch("archive.json")
-      .then((res) => res.json())
-      .then((data) => {
-        allItems = data.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-        renderTags();
-        renderList();
-      })
-      .catch(() => {
-        document.getElementById("list").innerHTML =
-          "<p>archive.json 파일을 확인해 주세요.</p>";
-      });
-
-    document.getElementById("search").addEventListener("input", renderList);
-
-    function renderTags() {
-      const tags = new Set(["전체"]);
-      allItems.forEach((item) => (item.tags || []).forEach((t) => tags.add(t)));
-      const bar = document.getElementById("tagBar");
-      bar.innerHTML = [...tags]
-        .map(
-          (tag) =>
-            `<button class="tag-btn ${tag === selectedTag ? "active" : ""}" onclick="selectTag('${tag}')">${tag}</button>`
-        )
-        .join("");
-    }
-
-    function selectTag(tag) {
-      selectedTag = tag;
-      renderTags();
-      renderList();
-    }
-
-    function renderList() {
-      const q = document.getElementById("search").value.trim().toLowerCase();
-      const filtered = allItems.filter((item) => {
-        const matchTag =
-          selectedTag === "전체" || (item.tags && item.tags.includes(selectedTag));
-        const hay = `${item.date || ""} ${item.source || ""} ${item.title || ""} ${item.text || ""}`.toLowerCase();
-        return matchTag && hay.includes(q);
-      });
-
-      const list = document.getElementById("list");
-      if (!filtered.length) {
-        list.innerHTML = "<p>조건에 맞는 백업 기록이 없습니다.</p>";
-        return;
+    const items = [
+      {
+        date: "2026-11-24",
+        title: "첫 번째 백업 사진",
+        image: "sample1.jpg"
       }
+    ];
 
-      list.innerHTML = filtered
-        .map(
-          (item) => `
-          <article class="card">
-            <div class="card-top">
-              <div>
-                ${item.source ? `<span class="badge">${item.source}</span>` : ""}
-                <span>${item.date || ""}</span>
-                ${item.tags && item.tags.length ? ` · ${item.tags.join(", ")}` : ""}
-              </div>
-              ${item.originalUrl ? `<a class="orig-link" href="${item.originalUrl}" target="_blank" rel="noopener">원문 링크 ↗</a>` : ""}
-            </div>
-            ${item.title ? `<h2 class="title">${item.title}</h2>` : ""}
-            ${item.text ? `<p class="text">${item.text}</p>` : ""}
-            ${
-              item.images && item.images.length
-                ? `<div class="gallery">${item.images
-                    .map((src) => `<img src="${src}" loading="lazy" alt="백업 이미지" />`)
-                    .join("")}</div>`
-                : ""
-            }
-          </article>
-        `
-        )
-        .join("");
-    }
+    document.getElementById("list").innerHTML = items
+      .map(
+        (item) => `
+        <article class="card">
+          <div class="meta">${item.date}</div>
+          <h2 class="title">${item.title}</h2>
+          <img src="${item.image}" alt="${item.title}" />
+        </article>
+      `
+      )
+      .join("");
   </script>
 </body>
 </html>
